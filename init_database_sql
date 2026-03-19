@@ -1,1 +1,80 @@
+-- Project: Modern Data Warehouse
+-- Author: Kshitiz Gupta
+-- Description: Initializes schemas and tables using Medallion Architecture (Bronze, Silver, Gold)
+-- Create Database (run separately if needed)
+-- CREATE DATABASE DataWareHouse;
 
+-- Connect to database
+-- \c DataWareHouse;
+
+---------------------------------------------------
+-- Create Schemas (Medallion Architecture)
+---------------------------------------------------
+
+CREATE SCHEMA IF NOT EXISTS bronze;
+CREATE SCHEMA IF NOT EXISTS silver;
+CREATE SCHEMA IF NOT EXISTS gold;
+
+---------------------------------------------------
+-- Bronze Layer (Raw Data)
+---------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS bronze.raw_customers (
+    customer_id INT,
+    name TEXT,
+    email TEXT,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS bronze.raw_orders (
+    order_id INT,
+    customer_id INT,
+    amount NUMERIC,
+    order_date TIMESTAMP
+);
+
+---------------------------------------------------
+-- Silver Layer (Cleaned Data)
+---------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS silver.customers (
+    customer_id INT PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS silver.orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    amount NUMERIC,
+    order_date TIMESTAMP
+);
+
+---------------------------------------------------
+-- Gold Layer (Analytics / Business Ready)
+---------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS gold.fact_orders (
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    amount NUMERIC,
+    order_date TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS gold.dim_customers (
+    customer_id INT PRIMARY KEY,
+    name TEXT,
+    email TEXT
+);
+
+---------------------------------------------------
+-- Optional: Indexes for Performance
+---------------------------------------------------
+
+CREATE INDEX IF NOT EXISTS idx_orders_customer
+ON gold.fact_orders(customer_id);
+
+---------------------------------------------------
+-- End of Script
+---------------------------------------------------
